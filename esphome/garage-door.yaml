@@ -71,8 +71,15 @@ cover:
       - lambda: |-
           garage_door_get_comp(garage_door_comp)->action_stop();
       - logger.log: "Template Garage stop"
-    optimistic: true
-    assumed_state: true
+    lambda: |-
+      auto state = garage_door_get_comp(garage_door_comp)->state_sensor->state.c_str();
+      if (strcmp(state, "closed") == 0) {
+        return COVER_CLOSED;
+      } else if (strcmp(state, "opening") == 0 || strcmp(state, "closing") == 0) {
+        return {};
+      } else {
+        return COVER_OPEN;
+      }
 
 switch:
 - platform: custom
